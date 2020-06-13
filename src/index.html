@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Scraper</title>
+    <meta charset="utf-8">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>Web Scraper</h1>
+<p>Enter a URL below, and click <code>Submit</code> to scrape.</p>
+<!--We no longer need the action or method attributes. See the javascript handler for the form-->
+<!--<form action="/scrape" method="get" id="scraper">-->
+<form id="scraper">
+    <label for="url">URL: </label>
+    <input type="text" name="url" id="url" placeholder="Enter URL here">
+    <input type="submit" id="submit">
+</form>
+
+<div id="dataWrapper"></div>
+
+<script>
+    $("#scraper").submit(function(e) {
+        // preventDefault prevents normal form execution (i.e. page redirecting, etc) and runs our Javascript instead
+        e.preventDefault();
+
+        var scrapeUrl = $('#url').val();
+        var urlData;
+
+        // Make the call to our /scrape endpoint
+        $.post("/scrape", {'url': scrapeUrl}, function(data, status) {
+            // Log the response data in our console. This SHOULD be a JSON string...
+            urlData = JSON.parse(data);
+
+            $("#dataWrapper").empty();
+
+            //add title to page
+            if (urlData.title) {
+                var titleH4 = document.createElement('h4')
+                $("#dataWrapper").append(titleH4);
+                titleH4.innerHTML = "Title: " + urlData.title;
+            }
+
+            //add OG data to page
+            if (urlData.ogData) {
+                var txt = "OG Data: ";
+                var keys = Object.keys(urlData.ogData);
+                var values = Object.values(urlData.ogData)
+                var ogH4 = document.createElement('h4')
+                $("#dataWrapper").append(ogH4);
+                $(keys).each((i) => {
+                    txt += keys[i] + " = " + values[i] + ", ";
+                })
+                ogH4.innerHTML = txt;
+            }
+        });
+    })
+</script>
+</body>
+</html>
